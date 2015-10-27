@@ -36,6 +36,8 @@ import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class AudioAppActivity extends AppCompatActivity {
 
@@ -189,7 +191,9 @@ public class AudioAppActivity extends AppCompatActivity {
                     sum = sum + pitch_value;
                 }
                 float average_pitch_value = sum / ((float)pitch_values.size());
-                msg.setText(pitch_values.size() + " values recorded ! Average Pitch = " + average_pitch_value);
+                String note = get_note(average_pitch_value);
+                msg.setText(pitch_values.size() + " values recorded ! Average Pitch = " + average_pitch_value + "\n"+
+                "Note = " + note);
                 recordButton.setEnabled(true);
             }
 
@@ -230,6 +234,39 @@ public class AudioAppActivity extends AppCompatActivity {
         // first find the pitch of the sound.
 
 
+    }
+
+    public String get_note(float average_pitch_value){
+        while(average_pitch_value > 185){
+            average_pitch_value = average_pitch_value / (float)2;
+        }
+        Map<String, Float> note_values= new HashMap<String, Float>();
+        note_values.put("F#",(float)92.5);
+        note_values.put("G",(float)98);
+        note_values.put("G#",(float)103.83);
+        note_values.put("A",(float)110);
+        note_values.put("A#",(float)116.54);
+        note_values.put("B",(float)123.47);
+        note_values.put("C",(float)130.81);
+        note_values.put("C#",(float)138.59);
+        note_values.put("D",(float)146.83);
+        note_values.put("D#",(float)155.56);
+        note_values.put("E",(float)164.81);
+        note_values.put("F",(float)174.61);
+        note_values.put("F#",(float)185);
+
+        Float min_diff = (float)10000.0;
+        String min_note = "F#";
+        for (Map.Entry<String,Float> entry : note_values.entrySet()) {
+            String key = entry.getKey();
+            Float value = entry.getValue();
+            Float diff = Math.abs(value - average_pitch_value);
+            if(diff < min_diff){
+                min_diff = diff;
+                min_note = key;
+            }
+        }
+        return min_note;
     }
 
 
