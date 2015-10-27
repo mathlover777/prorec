@@ -13,44 +13,79 @@
         android:text="Record Sound"
         android:id="@+id/recordButton"
         android:layout_alignParentTop="true"
-        android:layout_alignLeft="@+id/playButton"
-        android:layout_alignStart="@+id/playButton"
-        android:layout_alignRight="@+id/searchSimilar"
-        android:layout_alignEnd="@+id/searchSimilar"
-        android:onClick="recordAudio" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Play Recorded Sound"
-        android:id="@+id/playButton"
-        android:layout_below="@+id/recordButton"
+        android:onClick="recordAudio"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:onClick="playAudio" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Find Similar Melodies !"
-        android:id="@+id/searchSimilar"
-        android:layout_below="@+id/recordButton"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="66dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="Play Recorded Sound"-->
+        <!--android:id="@+id/playButton"-->
+        <!--android:layout_below="@+id/recordButton"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_alignParentStart="true"-->
+        <!--android:onClick="playAudio" />-->
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Stop"
-        android:id="@+id/stopButton"
-        android:layout_alignTop="@+id/playButton"
-        android:layout_toRightOf="@+id/playButton"
-        android:layout_alignBottom="@+id/playButton"
+        android:text="Play Similar"
+        android:id="@+id/searchSimilar"
+        android:onClick="searchClicked"
+        android:layout_below="@+id/msg"
+        android:layout_marginTop="102dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/msg"
+        android:layout_alignEnd="@+id/msg" />
+
+    <!--<Button-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="Stop"-->
+        <!--android:id="@+id/stopButton"-->
+        <!--android:layout_alignTop="@+id/playButton"-->
+        <!--android:layout_toRightOf="@+id/playButton"-->
+        <!--android:layout_alignBottom="@+id/playButton"-->
+        <!--android:layout_alignRight="@+id/recordButton"-->
+        <!--android:layout_alignEnd="@+id/recordButton"-->
+        <!--android:onClick="stopClicked" />-->
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Pitch : "
+        android:id="@+id/textView"
+        android:layout_below="@+id/recordButton"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="40dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Pitch Value"
+        android:id="@+id/pitch_value_display"
+        android:layout_alignTop="@+id/textView"
+        android:layout_toRightOf="@+id/textView"
+        android:layout_toEndOf="@+id/textView" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="msg"
+        android:id="@+id/msg"
+        android:layout_below="@+id/textView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="38dp"
         android:layout_alignRight="@+id/recordButton"
-        android:layout_alignEnd="@+id/recordButton"
-        android:onClick="stopClicked" />
+        android:layout_alignEnd="@+id/recordButton" />
 
 </RelativeLayout>
