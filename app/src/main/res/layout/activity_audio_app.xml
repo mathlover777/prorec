@@ -34,13 +34,12 @@
         android:layout_height="wrap_content"
         android:text="Play Similar"
         android:id="@+id/searchSimilar"
-        android:onClick="searchClicked"
-        android:layout_below="@+id/msg"
-        android:layout_marginTop="102dp"
+        android:onClick="play_similar_audio"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_alignRight="@+id/msg"
-        android:layout_alignEnd="@+id/msg" />
+        android:layout_alignRight="@+id/pitch_value_display"
+        android:layout_alignEnd="@+id/pitch_value_display" />
 
     <!--<Button-->
         <!--android:layout_width="wrap_content"-->
@@ -87,5 +86,43 @@
         android:layout_marginTop="38dp"
         android:layout_alignRight="@+id/recordButton"
         android:layout_alignEnd="@+id/recordButton" />
+
+    <!--<Switch-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="Pa"-->
+        <!--android:id="@+id/ma_pa_switch"-->
+        <!--android:layout_centerVertical="true"-->
+        <!--android:checked="true"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_alignParentStart="true"-->
+        <!--android:layout_alignRight="@+id/toggleButton"-->
+        <!--android:layout_alignEnd="@+id/toggleButton" />-->
+
+    <ToggleButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New ToggleButton"
+        android:id="@+id/ma_pa"
+        android:checked="false"
+        android:textOff="MA TONE"
+        android:textOn="PA TONE"
+        android:layout_above="@+id/searchSimilar"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignRight="@+id/msg"
+        android:layout_alignEnd="@+id/msg" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="STOP PLAY"
+        android:id="@+id/stop_play"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/searchSimilar"
+        android:layout_alignRight="@+id/msg"
+        android:layout_alignEnd="@+id/msg"
+        android:onClick="stop_music" />
 
 </RelativeLayout>
