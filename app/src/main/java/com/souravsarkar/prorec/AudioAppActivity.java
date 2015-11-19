@@ -3,24 +3,22 @@ package com.souravsarkar.prorec;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.content.pm.PackageManager;
-import android.media.MediaRecorder;
-import android.os.Environment;
 import android.widget.Button;
 import android.media.MediaPlayer;
 import android.media.AudioManager;
 import android.view.View;
 import java.io.IOException;
-import android.widget.TextView;
+
+import android.widget.EditText;
 import java.util.ArrayList;
 import android.widget.Toast;
-
-import java.io.File;
-import 	android.os.Handler;
+import android.content.Context;
+import android.os.Handler;
 import android.widget.ToggleButton;
-
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.io.android.AudioDispatcherFactory;
@@ -28,47 +26,32 @@ import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import be.tarsos.dsp.pitch.PitchProcessor.PitchEstimationAlgorithm;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-
+import android.graphics.Color;
 
 public class AudioAppActivity extends AppCompatActivity {
-
-    private static MediaRecorder mediaRecorder;
     private static MediaPlayer mediaPlayer;
-
-    private static String audioFilePath;
-    private static Button stopButton;
-    private static Button playButton;
     private static Button recordButton;
-    private static Button stop_play_button;
     private static ToggleButton ma_pa_toggle;
     private boolean currently_playing = false;
     private boolean params_computed = false;
-//    private static ListView melodyList;
-
-    private boolean isRecording = false;
-
-    //LIST OF ARRAY STRINGS WHICH WILL SERVE AS LIST ITEMS
-//    ArrayList<Melody> listItems=new ArrayList<Melody>();
-
-    //DEFINING A STRING ADAPTER WHICH WILL HANDLE THE DATA OF THE LISTVIEW
-//    ArrayAdapter<Melody> adapter;
-
-    private static String recordedMelodyName = "myaudio.3gp";
-    private static String basePath = Environment.getExternalStorageDirectory().getAbsolutePath();
-    private static String baseFolder = "prorec";
+    private static EditText pitch_field;
+    private static EditText median_pitch_field;
+    private static EditText note_field;
+    private static EditText is_male_field;
+    private static EditText tone_field;
 
     // output global variables
     private static String note_value = "";
     private static String ma_pa_value = "";
     private static boolean is_male = true;
-    private static float pitch_value = 0;
 
     List<Float> pitch_values = new ArrayList<>();
-//
-//    private static AQuery aq;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,37 +64,33 @@ public class AudioAppActivity extends AppCompatActivity {
 
         recordButton = (Button) findViewById(R.id.recordButton);
         ma_pa_toggle = (ToggleButton)findViewById(R.id.ma_pa);
-        stop_play_button = (Button) findViewById(R.id.stop_play);
-//        playButton = (Button) findViewById(R.id.playButton);
-//        stopButton = (Button) findViewById(R.id.stopButton);
+
+        pitch_field = (EditText) findViewById(R.id.pitch_field);
+        note_field = (EditText) findViewById(R.id.note_field);
+        median_pitch_field = (EditText) findViewById(R.id.median_pitch_field);
+        tone_field = (EditText) findViewById(R.id.tone_field);
+        is_male_field = (EditText) findViewById(R.id.is_male_field);
+
+        pitch_field.setEnabled(false);
+        note_field.setEnabled(false);
+        tone_field.setEnabled(false);
+        is_male_field.setEnabled(false);
+        median_pitch_field.setEnabled(false);
+
+        pitch_field.setTextColor(Color.BLACK);
+        note_field.setTextColor(Color.BLACK);
+        tone_field.setTextColor(Color.BLACK);
+        is_male_field.setTextColor(Color.BLACK);
+        median_pitch_field.setTextColor(Color.BLACK);
 
         if (!hasMicrophone())
         {
-//            stopButton.setEnabled(false);
-//            playButton.setEnabled(false);
             recordButton.setEnabled(false);
+            recordButton.setText("Microphone Not Available :(");
         } else {
-//            playButton.setEnabled(false);
-//            stopButton.setEnabled(false);
+
         }
-        init_recording_folder();
-        audioFilePath = basePath + "/" + baseFolder + "/" + recordedMelodyName;
-//        adapter = new ArrayAdapter<Melody>(this, android.R.layout.simple_list_item_1, listItems);
-//        melodyList = (ListView) findViewById(R.id.melodyList);
-//        melodyList.setAdapter(adapter);
-
     }
-
-    public void init_recording_folder(){
-        String fullFolderPath = basePath + "/" + baseFolder;
-        File folder = new File(fullFolderPath);
-        if(folder.exists() && folder.isDirectory()){
-            return;
-        }
-        folder.mkdirs();
-        return;
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -140,34 +119,32 @@ public class AudioAppActivity extends AppCompatActivity {
     }
     public void recordAudio (View view) throws IOException
     {
-//        isRecording = true;
-//        stopButton.setEnabled(true);
-//        playButton.setEnabled(false);
         recordButton.setEnabled(false);
-//
-//        try {
-//            mediaRecorder = new MediaRecorder();
-//            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-//            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-//            mediaRecorder.setOutputFile(audioFilePath);
-//            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-//            mediaRecorder.prepare();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        mediaRecorder.start();
-//        final Handler handler = new Handler();
-//        handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                //Do something after 100ms
-//                stopButton.performClick();
-//            }
-//        }, 5000);
+        AudioManager audioManager = (AudioManager) this.getSystemService(Context.AUDIO_SERVICE);
+        String rate_string = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_SAMPLE_RATE);
+        String size_string = audioManager.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
+
+        Log.d("ss_log", "Size :" + size_string + " & Rate: " + rate_string);
+
+        int size = Integer.parseInt(size_string);
+        int rate = Integer.parseInt(rate_string);
+
         pitch_values.clear();
-        AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050,1024,0);
-        dispatcher.addAudioProcessor(new PitchProcessor(PitchEstimationAlgorithm.FFT_YIN, 22050, 1024, new PitchDetectionHandler() {
+        AudioDispatcher dispatcher = null;
+        try {
+            dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(rate, size, 0);
+        }catch (Exception e){
+            Log.d("ss_log","cant create dispatcher");
+            System.out.print("Exception");
+        }
+        if (dispatcher == null){
+            Log.d("ss_log","dispatcher is null");
+            System.out.print("null error !");
+        }else{
+            Log.d("ss_log","dispatcher is fine");
+        }
+        assert dispatcher != null;
+        dispatcher.addAudioProcessor(new PitchProcessor(PitchEstimationAlgorithm.FFT_YIN, rate, size, new PitchDetectionHandler() {
 
             @Override
             public void handlePitch(PitchDetectionResult pitchDetectionResult,
@@ -176,8 +153,7 @@ public class AudioAppActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        TextView text = (TextView) findViewById(R.id.pitch_value_display);
-                        text.setText("" + pitchInHz);
+                        pitch_field.setText("" + pitchInHz);
                         if (pitchInHz > 0) {
                             pitch_values.add(pitchInHz);
                         }
@@ -191,24 +167,34 @@ public class AudioAppActivity extends AppCompatActivity {
         handler2.postDelayed(new Runnable() {
             @Override
             public void run() {
-                //Do something after 100ms
-                TextView msg = (TextView) findViewById(R.id.msg);
-                float sum = 0;
-                for(float pitch_value : pitch_values){
-                    sum = sum + pitch_value;
-                }
-                float average_pitch_value = sum / ((float)pitch_values.size());
-                pitch_value = average_pitch_value;
-                note_value = get_note(average_pitch_value);
+                float median_pitch_value = get_median(pitch_values);
+                note_value = get_note(median_pitch_value);
                 ma_pa_value = get_ma_pa_value();
-                is_male = get_male_flag(average_pitch_value);
-                msg.setText(pitch_values.size() + " values recorded ! Average Pitch = " + average_pitch_value + "\n"+
-                "Note = " + note_value + " MA/PA = " + ma_pa_value + " IS MALE = " + is_male);
-                recordButton.setEnabled(true);
+                is_male = get_male_flag(median_pitch_value);
+
+                note_field.setText(note_value);
+                median_pitch_field.setText("" + median_pitch_value);
+                tone_field.setText(ma_pa_value);
+                is_male_field.setText("" + is_male);
+
                 params_computed = true;
+                play_similar_audio();
             }
 
-        }, 5000);
+        }, 2000);
+    }
+    private float get_median(List<Float> numArray){
+        Collections.sort(numArray);
+        int middle = ((numArray.size()) / 2);
+        float median = (float)0.0;
+        if(numArray.size() % 2 == 0){
+            float medianA = numArray.get(middle);
+            float medianB = numArray.get(middle - 1);
+            median = (medianA + medianB) / 2;
+        } else{
+            median = numArray.get(middle + 1);
+        }
+        return median;
     }
     private String get_ma_pa_value(){
         if (ma_pa_toggle.isChecked()){
@@ -222,44 +208,12 @@ public class AudioAppActivity extends AppCompatActivity {
         }
         return true;
     }
-    public void stopClicked (View view)
-    {
 
-        stopButton.setEnabled(false);
-        playButton.setEnabled(true);
 
-        if (isRecording)
-        {
-            recordButton.setEnabled(false);
-            mediaRecorder.stop();
-            mediaRecorder.release();
-            mediaRecorder = null;
-            isRecording = false;
-        } else {
-            mediaPlayer.release();
-            mediaPlayer = null;
-            recordButton.setEnabled(true);
-        }
-    }
-    public void playAudio (View view) throws IOException
-    {
-        playButton.setEnabled(false);
-        recordButton.setEnabled(false);
-        stopButton.setEnabled(true);
-
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setDataSource(audioFilePath);
-        mediaPlayer.prepare();
-        mediaPlayer.start();
-        mediaPlayer.setLooping(true);
-    }
-
-    public void play_continious_music(String music_file) throws IOException,NoSuchFieldException,IllegalAccessException{
+    public void play_continuous_music(String music_file) throws IOException,NoSuchFieldException,IllegalAccessException{
         currently_playing = true;
         mediaPlayer = MediaPlayer.create(this,R.raw.class.getField(music_file).getInt(null));
-
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-       // mediaPlayer.prepare();
         mediaPlayer.start();
         mediaPlayer.setLooping(true);
     }
@@ -268,6 +222,8 @@ public class AudioAppActivity extends AppCompatActivity {
         if(currently_playing){
             mediaPlayer.release();
             mediaPlayer = null;
+            recordButton.setEnabled(true);
+            currently_playing = false;
             recordButton.setEnabled(true);
         }
     }
@@ -288,13 +244,13 @@ public class AudioAppActivity extends AppCompatActivity {
         Toast.makeText(this,"TO PLAY : " + audio_file, Toast.LENGTH_LONG).show();
         return audio_file;
     }
-    public void play_similar_audio(View view){
+    public void play_similar_audio(){
         if( !params_computed){
             return;
         }
         String audio_file = get_audio_file(note_value,ma_pa_value,is_male);
         try {
-            play_continious_music(audio_file);
+            play_continuous_music(audio_file);
         }catch (Exception e){
 
         }
@@ -320,7 +276,7 @@ public class AudioAppActivity extends AppCompatActivity {
         note_values.put("F",(float)174.61);
         note_values.put("FS",(float)185);
 
-        Float min_diff = (float)10000.0;
+        Float min_diff = (float)100000.0;
         String min_note = "FS";
         for (Map.Entry<String,Float> entry : note_values.entrySet()) {
             String key = entry.getKey();
@@ -333,7 +289,4 @@ public class AudioAppActivity extends AppCompatActivity {
         }
         return min_note;
     }
-
-
-
 }
