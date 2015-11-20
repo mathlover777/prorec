@@ -83,11 +83,11 @@ public class AudioAppActivity extends AppCompatActivity {
         is_male_field.setEnabled(false);
         median_pitch_field.setEnabled(false);
 
-        pitch_field.setTextColor(Color.BLACK);
-        note_field.setTextColor(Color.BLACK);
-        tone_field.setTextColor(Color.BLACK);
-        is_male_field.setTextColor(Color.BLACK);
-        median_pitch_field.setTextColor(Color.BLACK);
+        pitch_field.setTextColor(Color.GREEN);
+        note_field.setTextColor(Color.GREEN);
+        tone_field.setTextColor(Color.GREEN);
+        is_male_field.setTextColor(Color.GREEN);
+        median_pitch_field.setTextColor(Color.GREEN);
 
         if (!hasMicrophone())
         {
