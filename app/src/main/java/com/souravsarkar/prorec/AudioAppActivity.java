@@ -46,6 +46,8 @@ public class AudioAppActivity extends AppCompatActivity {
     private static EditText is_male_field;
     private static EditText tone_field;
     private static int backButtonCount;
+    private static int size;
+    private static int rate;
 
     // output global variables
     private static String note_value = "";
@@ -144,23 +146,14 @@ public class AudioAppActivity extends AppCompatActivity {
 
         Log.d("ss_log", "Size :" + size_string + " & Rate: " + rate_string);
 
-        int size = Integer.parseInt(size_string);
-        int rate = Integer.parseInt(rate_string);
+        size = Integer.parseInt(size_string);
+        rate = Integer.parseInt(rate_string);
 
         pitch_values.clear();
-        AudioDispatcher dispatcher = null;
-        try {
-            dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(rate, size, 0);
-        }catch (Exception e){
-            Log.d("ss_log","cant create dispatcher");
-            System.out.print("Exception");
-        }
-        if (dispatcher == null){
-            Log.d("ss_log","dispatcher is null");
-            System.out.print("null error !");
-        }else{
-            Log.d("ss_log","dispatcher is fine");
-        }
+        AudioDispatcher dispatcher = get_audio_dispatcher();
+
+        Log.d("ss_log", "NEW Size :" + size + " & Rate: " + rate);
+
         assert dispatcher != null;
         dispatcher.addAudioProcessor(new PitchProcessor(PitchEstimationAlgorithm.FFT_YIN, rate, size, new PitchDetectionHandler() {
 
@@ -205,6 +198,30 @@ public class AudioAppActivity extends AppCompatActivity {
             }
 
         }, 2000);
+    }
+    private AudioDispatcher get_audio_dispatcher(){
+        AudioDispatcher dispatcher = null;
+        try {
+            dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(rate, size, 0);
+        }catch (Exception e){
+            Log.d("ss_log","cant create dispatcher");
+            System.out.print("Exception");
+        }
+        if (dispatcher == null){
+            rate = 22050;
+            size = 1024;
+            try {
+                dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(rate,size,0);
+            }catch (Exception e){
+                Log.d("ss_log","cant create default dispatcher");
+                System.out.print("Exception");
+            }
+            if(dispatcher == null){
+                Log.d("ss_log", "new dispatcher is also null");
+                Toast.makeText(this,"Unable to create Dispatcher !", Toast.LENGTH_LONG).show();
+            }
+        }
+        return dispatcher;
     }
     private float get_median(List<Float> numArray){
         if (numArray.size() == 0){
