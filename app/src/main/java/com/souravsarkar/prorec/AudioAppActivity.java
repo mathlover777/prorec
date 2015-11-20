@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import android.graphics.Color;
+import android.content.Intent;
 
 public class AudioAppActivity extends AppCompatActivity {
     private static MediaPlayer mediaPlayer;
@@ -44,6 +45,7 @@ public class AudioAppActivity extends AppCompatActivity {
     private static EditText note_field;
     private static EditText is_male_field;
     private static EditText tone_field;
+    private static int backButtonCount;
 
     // output global variables
     private static String note_value = "";
@@ -71,6 +73,8 @@ public class AudioAppActivity extends AppCompatActivity {
         tone_field = (EditText) findViewById(R.id.tone_field);
         is_male_field = (EditText) findViewById(R.id.is_male_field);
 
+        backButtonCount = 0;
+
         pitch_field.setEnabled(false);
         note_field.setEnabled(false);
         tone_field.setEnabled(false);
@@ -87,8 +91,6 @@ public class AudioAppActivity extends AppCompatActivity {
         {
             recordButton.setEnabled(false);
             recordButton.setText("Microphone Not Available :(");
-        } else {
-
         }
     }
     @Override
@@ -111,6 +113,22 @@ public class AudioAppActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+    @Override
+    public void onBackPressed()
+    {
+        if(backButtonCount >= 1)
+        {
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_HOME);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
+        else
+        {
+            Toast.makeText(this, "Press the back button once again to close the application.", Toast.LENGTH_SHORT).show();
+            backButtonCount++;
+        }
     }
     protected boolean hasMicrophone() {
         PackageManager pmanager = this.getPackageManager();
@@ -168,25 +186,37 @@ public class AudioAppActivity extends AppCompatActivity {
             @Override
             public void run() {
                 float median_pitch_value = get_median(pitch_values);
-                note_value = get_note(median_pitch_value);
-                ma_pa_value = get_ma_pa_value();
-                is_male = get_male_flag(median_pitch_value);
+                if (median_pitch_value < 0){
+                    params_computed = false;
+                    recordButton.setEnabled(true);
+                }else {
+                    note_value = get_note(median_pitch_value);
+                    ma_pa_value = get_ma_pa_value();
+                    is_male = get_male_flag(median_pitch_value);
 
-                note_field.setText(note_value);
-                median_pitch_field.setText("" + median_pitch_value);
-                tone_field.setText(ma_pa_value);
-                is_male_field.setText("" + is_male);
+                    note_field.setText(note_value);
+                    median_pitch_field.setText("" + median_pitch_value);
+                    tone_field.setText(ma_pa_value);
+                    is_male_field.setText("" + is_male);
 
-                params_computed = true;
-                play_similar_audio();
+                    params_computed = true;
+                    play_similar_audio();
+                }
             }
 
         }, 2000);
     }
     private float get_median(List<Float> numArray){
+        if (numArray.size() == 0){
+            Toast.makeText(this,"Did not get sufficient samples, record again !", Toast.LENGTH_LONG).show();
+            return -1;
+        }
+        if (numArray.size() == 1){
+            return numArray.get(0);
+        }
         Collections.sort(numArray);
         int middle = ((numArray.size()) / 2);
-        float median = (float)0.0;
+        float median;
         if(numArray.size() % 2 == 0){
             float medianA = numArray.get(middle);
             float medianB = numArray.get(middle - 1);
@@ -252,9 +282,8 @@ public class AudioAppActivity extends AppCompatActivity {
         try {
             play_continuous_music(audio_file);
         }catch (Exception e){
-
+            Toast.makeText(this,"Exception in music play, its a bug !", Toast.LENGTH_LONG).show();
         }
-        return;
     }
 
     public String get_note(float average_pitch_value){
